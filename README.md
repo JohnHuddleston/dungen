@@ -23,3 +23,7 @@ Primarily following [the bracket_lib roguelike tutorial](https://bfnightly.brack
     * Physical, magical... psychological???
 * Game loop
   * First pass should stick to the standard single-run permadeath roguelike setup, but eventually I'll move to a full game loop in which a basic plot (procgen'd would be cool) utilizes a run system inside of a save-file persistence system where run rewards can be turned into power enhancement/character modifications.
+* Graphics
+  * Currently only ASCII/CCSID 437 characters, but I'd love to switch to tilesets
+  * The renderer uses GLSL shaders, that's an opportunity to get absolutely wild with the output
+  * The shader will likely only be applied to the full screen output as a sort of post-processing step, so if I want lighting I'll have to work that out on my own (lighting system that can modify the output color of a character/the lightness of a tile)
