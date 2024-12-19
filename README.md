@@ -11,8 +11,9 @@ Primarily following [the bracket_lib roguelike tutorial](https://bfnightly.brack
     * Themes may eventually also mutate the input map even further, and/or be used to seed objects and entities (both hostile & non-hostile NPCs)
   * Abstract maps will be assembled from a variety of techniques including binary space partitioning, room tree generation and analysis, wave function collapse, and prefab assembly
   * Eventually a 'map' may encompass multiple levels, this will ultimately be controlled at the generation level but supported by functionality in the map generation module
-  * Tile palettes: different kinds of maps should have different colors of cells (and maybe even represent cells with different characters) -> a normal overworld area should have green grass, but maybe grass outside of a necromancer's tower has died and should brown, while an arcane wizard tower's grass may have turned purple from some wild experiment!
+  * Tile palettes: different kinds of maps should have different colors of cells (and maybe even represent cells with different characters) -> a normal overworld area should have green grass, but maybe grass outside of a necromancer's tower has died and should be brown, while an arcane wizard tower's grass may have turned purple from some wild experiment!
     * Map drawing can also be made more complex to properly draw out walls with box-drawing characters (or use special tiles for the same purpose)
+    * Current palette implementation is very limited, but will be extended.  Storing const [[RGBA]] is gross, too, I should load those from hex values in a RON file.
 * Camera & Movement
   * Current setup has a static 'camera' meaning a heavily limited map space (80x50 characters), this will need to be replaced with a player-following camera.
 
