@@ -1,3 +1,5 @@
+// (Roughly) translated to Rust from https://github.com/munificent/hauberk/blob/db360d9efa714efb6d937c31953ef849c7394a39/lib/src/content/dungeon.dart
+
 use std::{
     collections::{HashMap, HashSet},
     usize,
@@ -7,17 +9,15 @@ use crate::map_gen::{abstract_map::TileMap, abstract_tiles::AbstractMapTiles};
 use bracket_lib::prelude::Rect;
 use rand::prelude::*;
 
-const MAX_PLACEMENT_TRIES: u16 = 1000;
-const BASE_ROOM_MAX: u32 = 6;
+const MAX_PLACEMENT_TRIES: u16 = 200;
+const BASE_ROOM_MAX: u32 = 4;
 const DIRECTIONS: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
-const WINDING_FACTOR: i32 = 20;
+const WINDING_FACTOR: i32 = 10;
 
 pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
     let mut current_region = -1;
     let mut regions: Vec<i32> = vec![-1; (tilemap.dimensions.x * tilemap.dimensions.y) as usize];
     let mut rooms: Vec<Rect> = Vec::new();
-
-    let extra_connection_chance = 20;
 
     let mut rng = rand::thread_rng();
 
@@ -120,8 +120,8 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
 
     // connect regions
     let mut connector_regions: HashMap<(u32, u32), HashSet<i32>> = HashMap::new();
-    for y in 0..(tilemap.dimensions.y - 1) {
-        for x in 0..(tilemap.dimensions.x - 1) {
+    for y in 1..(tilemap.dimensions.y - 1) {
+        for x in 1..(tilemap.dimensions.x - 1) {
             let index = y * tilemap.dimensions.x + x;
             if tilemap.tilemap[index as usize] != AbstractMapTiles::WALL {
                 continue;
@@ -174,7 +174,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
         let sources: Vec<i32> = affected_regions.map(|v| *v).collect();
 
         for i in 0..=current_region {
-            if sources.contains(&merged[&i]) {
+            if sources.contains(&merged.get(&i).unwrap()) {
                 merged.insert(i, dest);
             }
         }
@@ -182,28 +182,49 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
         sources.iter().for_each(|s| {
             open_regions.remove(s);
         });
-
-        let reduced_connectors = connectors
+        //let reduced_connectors: Vec<&(u32, u32)> = connectors
+        //    .iter()
+        //    .cloned()
+        //    .filter(|c| {
+        //        let distance = f64::sqrt(
+        //            (random_connector.0.abs_diff(c.0).pow(2)
+        //                + random_connector.1.abs_diff(c.1).pow(2)) as f64,
+        //        ) as i32;
+        //        if distance <= 3 {
+        //            ()
+        //        }
+        //        let region_test: HashSet<i32> = connector_regions
+        //            .get(&c)
+        //            .unwrap()
+        //            .iter()
+        //            .map(|r| *merged.get(r).unwrap())
+        //            .collect();
+        //        if region_test.len() >= 1 {
+        //            ()
+        //        }
+        //        // add optional here (P=1/3 in original)
+        //        true
+        //    })
+        //    //.map(|c| *c)
+        //    .collect();
+        let reduced_connectors: Vec<&(u32, u32)> = connectors
             .iter()
             .filter(|c| {
-                let distance = f64::sqrt(
-                    (random_connector.0.abs_diff(c.0).pow(2)
-                        + random_connector.1.abs_diff(c.1).pow(2)) as f64,
-                ) as i32;
-                if distance <= 2 {
-                    ()
-                }
-                let region_test: HashSet<i32> = connector_regions
-                    .get(&c)
+                f64::sqrt(
+                    ((random_connector.0.abs_diff(c.0).pow(2))
+                        + (random_connector.1.abs_diff(c.1)).pow(2)) as f64,
+                ) as u32
+                    > 3
+            })
+            .filter(|c| {
+                connector_regions
+                    .get(c)
                     .unwrap()
                     .iter()
                     .map(|r| *merged.get(r).unwrap())
-                    .collect();
-                if region_test.len() <= 1 {
-                    ()
-                }
-                // add optional here (P=1/3 in original)
-                true
+                    .collect::<HashSet<i32>>()
+                    .len()
+                    > 1
             })
             .map(|c| *c)
             .collect();
