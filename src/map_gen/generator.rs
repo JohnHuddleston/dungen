@@ -50,19 +50,9 @@ impl LevelBuilder {
     pub fn build(&self) -> Option<Vec<TileMap>> {
         let mut levels: Vec<TileMap> = Vec::new();
         for _ in 0..self.n_levels {
-            let mut new_map = TileMap::new(self.palette);
+            let mut new_map = TileMap::new(UVec2 { x: 79, y: 49 }, self.palette);
             //build_bsp_dungeon(&mut new_map, &self.dimensions);
             build_hauberk_dungeon(&mut new_map);
-            //for x in 0..self.dimensions.x {
-            //    new_map.tilemap[x as usize] = AbstractMapTiles::WALL;
-            //    new_map.tilemap[(x + ((self.dimensions.y - 1) * self.dimensions.x)) as usize] =
-            //        AbstractMapTiles::WALL;
-            //}
-            //for y in 1..self.dimensions.y - 1 {
-            //    new_map.tilemap[(y * self.dimensions.x) as usize] = AbstractMapTiles::WALL;
-            //    new_map.tilemap[(y * self.dimensions.x + self.dimensions.x - 1) as usize] =
-            //        AbstractMapTiles::WALL;
-            //}
             levels.push(new_map);
         }
         Some(levels)

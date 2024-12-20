@@ -4,6 +4,17 @@ This is currently just a test repository for working out the basics of a rogueli
 
 Primarily following [the bracket_lib roguelike tutorial](https://bfnightly.bracketproductions.com/rustbook) but making custom implementations where desired.
 
+#### Immediate To-Do's:
+1. Refactor level building to be fault tolerant in cases where procgen fails
+  1. Could be handled internally to the generation functions, clone out the tilemap and only replace it on a success?
+2. Move palette definitions to a config file (RON looks nice)
+  1. USE HEXSTRINGS, bracket_lib defining RGBA as (f32, f32, f32, f32) with elements 0.0..=1.0 is, frankly, insane, and it looks AWFUL when cargo formatted.
+  2. The palette selected should be added to the World as a resource so that all parts of the game can pull from it.
+  3. Move to 16-color palettes ASAP so I'm not limited to FG, BG, and 2 accents for everything.
+3. MOVEMENT - I need to get something simple in there, just move and get blocked by walls, this is important for the next item...
+4. CAMERA - 80x50 is annoyingly small, and with the odd-dimension restriction on at least the Hauberk style generation it's an even gnarlier 79x49!  Having a camera set up lets me make map of arbitrarily large sizes (within reason, generation will obviously take longer, though 5ms vs 20ms for the generation stage doesn't really matter)
+
+
 **Current Efforts:**
 * Map Generation
   * A set of basic map types and abstract tiles have been created, these will be used by MapBuilder to generate tilemaps.

@@ -28,11 +28,11 @@ pub struct TileMap {
 
 #[allow(unused)]
 impl TileMap {
-    pub fn new(palette: Palette) -> Self {
+    pub fn new(dimensions: UVec2, palette: Palette) -> Self {
         TileMap {
-            tilemap: vec![AbstractMapTiles::WALL; 80 * 50],
+            tilemap: vec![AbstractMapTiles::WALL; dimensions.x as usize * dimensions.y as usize],
             palette,
-            dimensions: UVec2 { x: 79, y: 49 },
+            dimensions,
             player_spawn: UVec2 { x: 0, y: 0 },
             exits: Vec::new(),
         }

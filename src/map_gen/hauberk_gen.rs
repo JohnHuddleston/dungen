@@ -9,10 +9,12 @@ use crate::map_gen::{abstract_map::TileMap, abstract_tiles::AbstractMapTiles};
 use bracket_lib::prelude::Rect;
 use rand::prelude::*;
 
-const MAX_PLACEMENT_TRIES: u16 = 200;
-const BASE_ROOM_MAX: u32 = 4;
+const MAX_PLACEMENT_TRIES: u16 = 1500;
+const BASE_ROOM_MIN: u32 = 1;
+const BASE_ROOM_MAX: u32 = 6;
 const DIRECTIONS: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
-const WINDING_FACTOR: i32 = 10;
+const WINDING_FACTOR: i32 = 30;
+const EXTRA_CONNECTION_CHANCE: i32 = 30;
 
 pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
     let mut current_region = -1;
@@ -23,8 +25,8 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
 
     // add rooms
     for _ in 0..MAX_PLACEMENT_TRIES {
-        let size = rng.gen_range(1..=BASE_ROOM_MAX) * 2 + 1;
-        let extension = ((rng.gen_range(0..1) + size) / 2) * 2;
+        let size = rng.gen_range(BASE_ROOM_MIN..=BASE_ROOM_MAX) * 2 + 1;
+        let extension = ((rng.gen_range(0..=1) + size) / 2) * 2;
         let mut width = size;
         let mut height = size;
 
@@ -159,7 +161,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
         open_regions.insert(i);
     }
 
-    while open_regions.len() > 1 {
+    while open_regions.len() > 0 {
         let random_connector = connectors[rng.gen_range(0..connectors.len())];
         tilemap.tilemap
             [(random_connector.1 * tilemap.dimensions.x + random_connector.0) as usize] =
@@ -182,31 +184,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
         sources.iter().for_each(|s| {
             open_regions.remove(s);
         });
-        //let reduced_connectors: Vec<&(u32, u32)> = connectors
-        //    .iter()
-        //    .cloned()
-        //    .filter(|c| {
-        //        let distance = f64::sqrt(
-        //            (random_connector.0.abs_diff(c.0).pow(2)
-        //                + random_connector.1.abs_diff(c.1).pow(2)) as f64,
-        //        ) as i32;
-        //        if distance <= 3 {
-        //            ()
-        //        }
-        //        let region_test: HashSet<i32> = connector_regions
-        //            .get(&c)
-        //            .unwrap()
-        //            .iter()
-        //            .map(|r| *merged.get(r).unwrap())
-        //            .collect();
-        //        if region_test.len() >= 1 {
-        //            ()
-        //        }
-        //        // add optional here (P=1/3 in original)
-        //        true
-        //    })
-        //    //.map(|c| *c)
-        //    .collect();
+
         let reduced_connectors: Vec<&(u32, u32)> = connectors
             .iter()
             .filter(|c| {
@@ -214,20 +192,22 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
                     ((random_connector.0.abs_diff(c.0).pow(2))
                         + (random_connector.1.abs_diff(c.1)).pow(2)) as f64,
                 ) as u32
-                    > 3
+                    > 2
             })
             .filter(|c| {
-                connector_regions
+                (connector_regions
                     .get(c)
                     .unwrap()
                     .iter()
                     .map(|r| *merged.get(r).unwrap())
                     .collect::<HashSet<i32>>()
                     .len()
-                    > 1
+                    > 1)
+                    || rng.gen_range(1..=100) < EXTRA_CONNECTION_CHANCE
             })
             .map(|c| *c)
             .collect();
+
         connectors = reduced_connectors;
     }
 
