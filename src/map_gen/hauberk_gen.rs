@@ -9,12 +9,12 @@ use crate::map_gen::{abstract_map::TileMap, abstract_tiles::AbstractMapTiles};
 use bracket_lib::prelude::Rect;
 use rand::prelude::*;
 
-const MAX_PLACEMENT_TRIES: u16 = 1500;
-const BASE_ROOM_MIN: u32 = 1;
-const BASE_ROOM_MAX: u32 = 6;
+const MAX_PLACEMENT_TRIES: u16 = 2000;
+const BASE_ROOM_MIN: u32 = 2;
+const BASE_ROOM_MAX: u32 = 5;
 const DIRECTIONS: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
-const WINDING_FACTOR: i32 = 30;
-const EXTRA_CONNECTION_CHANCE: i32 = 30;
+const WINDING_FACTOR: i32 = 50;
+const EXTRA_CONNECTION_CHANCE: i32 = 80;
 
 pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
     let mut current_region = -1;

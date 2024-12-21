@@ -7,12 +7,21 @@ use crate::map_gen::{
 };
 use crate::palettes::Palette;
 use glam::UVec2;
+use specs::{prelude::*, Component};
 
 pub struct LevelBuilder {
     map_type: MapType,
     palette: Palette,
     dimensions: UVec2,
-    n_levels: u8,
+    n_maps: u8,
+}
+
+#[derive(Component)]
+pub struct Level {
+    pub map_type: MapType,
+    pub palette: Palette,
+    pub dimensions: UVec2,
+    pub maps: Vec<TileMap>,
 }
 
 #[allow(unused)]
@@ -22,7 +31,7 @@ impl LevelBuilder {
             map_type: MapType::Base,
             palette: Palette::Default,
             dimensions: UVec2 { x: 80, y: 50 },
-            n_levels: 1,
+            n_maps: 1,
         }
     }
 
@@ -37,8 +46,8 @@ impl LevelBuilder {
         self
     }
 
-    pub fn with_n_levels(mut self, n: u8) -> LevelBuilder {
-        self.n_levels = n;
+    pub fn with_n_maps(mut self, n: u8) -> LevelBuilder {
+        self.n_maps = n;
         self
     }
 
@@ -47,14 +56,19 @@ impl LevelBuilder {
         self
     }
 
-    pub fn build(&self) -> Option<Vec<TileMap>> {
-        let mut levels: Vec<TileMap> = Vec::new();
-        for _ in 0..self.n_levels {
+    pub fn build(&self) -> Option<Level> {
+        let mut maps: Vec<TileMap> = Vec::new();
+        for _ in 0..self.n_maps {
             let mut new_map = TileMap::new(UVec2 { x: 79, y: 49 }, self.palette);
             //build_bsp_dungeon(&mut new_map, &self.dimensions);
             build_hauberk_dungeon(&mut new_map);
-            levels.push(new_map);
+            maps.push(new_map);
         }
-        Some(levels)
+        Some(Level {
+            map_type: self.map_type,
+            palette: self.palette,
+            dimensions: self.dimensions,
+            maps,
+        })
     }
 }

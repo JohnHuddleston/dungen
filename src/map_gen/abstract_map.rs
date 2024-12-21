@@ -7,6 +7,7 @@ use glam::UVec2;
 // be done on each level, etc.  May need to pair with difficulty rating, or that can be handled on
 // the population side.
 #[allow(unused)]
+#[derive(Clone, Copy)]
 pub enum MapType {
     Base,
     Dungeon,
