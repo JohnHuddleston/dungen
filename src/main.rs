@@ -6,42 +6,53 @@ mod map_gen {
     pub mod hauberk_gen;
 }
 mod palettes;
+mod visibility_system;
 
 use crate::map_gen::{
     abstract_map::MapType,
     generator::{Level, LevelBuilder},
 };
 use crate::palettes::Palette;
+use crate::visibility_system::VisiblitySystem;
 use bracket_lib::prelude::*;
 use map_gen::abstract_tiles::AbstractMapTiles;
 use specs::{prelude::*, Component};
 
 #[derive(Component, Debug)]
-struct Position {
+pub struct Position {
     x: i32,
     y: i32,
 }
 
 #[derive(Component, Debug)]
-struct Renderable {
+pub struct Renderable {
     glyph: FontCharType,
     fg: RGBA,
     bg: RGBA,
 }
 
+#[derive(Component, Debug)]
+pub struct Viewshed {
+    pub visible_tiles: Vec<Point>,
+    pub range: i32,
+    pub dirty: bool,
+}
+
 #[derive(Component)]
-struct Player {}
+pub struct Player {}
 
 fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     let mut positions = ecs.write_storage::<Position>();
     let mut players = ecs.write_storage::<Player>();
+    let mut viewsheds = ecs.write_storage::<Viewshed>();
     let level = ecs.fetch::<Level>();
 
-    for (_, pos) in (&mut players, &mut positions).join() {
+    for (_, pos, viewshed) in (&mut players, &mut positions, &mut viewsheds).join() {
         let destination_idx = (pos.y + delta_y) * level.dimensions.x as i32 + (pos.x + delta_x);
         if level.maps[0].tilemap[destination_idx as usize] != AbstractMapTiles::WALL {
             pos.x = pos.x + delta_x;
             pos.y = pos.y + delta_y;
+            viewshed.dirty = true;
         }
     }
 }
@@ -70,7 +81,9 @@ impl GameState for State {
         self.run_systems();
 
         let level = self.ecs.fetch::<Level>();
-        level.maps[0].draw(ctx);
+        let viewsheds = self.ecs.read_storage::<Viewshed>();
+        let viewshed = viewsheds.join().collect::<Vec<_>>()[0];
+        level.maps[0].draw(&viewshed, ctx);
 
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
@@ -83,6 +96,8 @@ impl GameState for State {
 
 impl State {
     fn run_systems(&mut self) {
+        let mut vis = VisiblitySystem {};
+        vis.run_now(&self.ecs);
         self.ecs.maintain();
     }
 }
@@ -96,12 +111,13 @@ fn main() -> BError {
         .with_title("Chosen v0.0.0.1pre-alpha")
         .build()?;
 
-    let palette = Palette::GB;
+    let palette = Palette::Default;
 
     let mut gs = State { ecs: World::new() };
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
+    gs.ecs.register::<Viewshed>();
 
     let level = LevelBuilder::new()
         .with_dimensions(79, 49)
@@ -122,6 +138,11 @@ fn main() -> BError {
             bg: palette.bg(),
         })
         .with(Player {})
+        .with(Viewshed {
+            visible_tiles: Vec::new(),
+            range: 8,
+            dirty: true,
+        })
         .build();
 
     gs.ecs.insert(level);

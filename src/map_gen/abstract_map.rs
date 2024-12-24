@@ -1,5 +1,5 @@
 use crate::map_gen::abstract_tiles::AbstractMapTiles;
-use crate::Palette;
+use crate::{Palette, Viewshed};
 use bracket_lib::prelude::*;
 use glam::UVec2;
 
@@ -21,6 +21,8 @@ pub enum MapType {
 #[allow(unused)]
 pub struct TileMap {
     pub tilemap: Vec<AbstractMapTiles>,
+    pub discovered: Vec<bool>,
+    pub visible: Vec<bool>,
     pub palette: Palette,
     pub dimensions: UVec2,
     pub player_spawn: UVec2,
@@ -32,6 +34,8 @@ impl TileMap {
     pub fn new(dimensions: UVec2, palette: Palette) -> Self {
         TileMap {
             tilemap: vec![AbstractMapTiles::WALL; dimensions.x as usize * dimensions.y as usize],
+            discovered: vec![false; dimensions.x as usize * dimensions.y as usize],
+            visible: vec![false; dimensions.x as usize * dimensions.y as usize],
             palette,
             dimensions,
             player_spawn: UVec2 { x: 0, y: 0 },
@@ -39,7 +43,7 @@ impl TileMap {
         }
     }
 
-    pub fn draw(&self, ctx: &mut BTerm) {
+    pub fn draw(&self, viewshed: &Viewshed, ctx: &mut BTerm) {
         for x in 0..self.dimensions.x {
             for y in 0..self.dimensions.y {
                 let glyph: u16;
@@ -60,14 +64,33 @@ impl TileMap {
                     AbstractMapTiles::GROUND => glyph = to_cp437(','),
                     AbstractMapTiles::UNKNOWN => glyph = to_cp437('?'),
                 }
-                ctx.set(
-                    x,
-                    y,
-                    self.palette.color_idx(3).expect("Palette load failed."),
-                    self.palette.bg(),
-                    glyph,
-                );
+                let point: Point = Point::new(x, y);
+                if self.discovered[(y * self.dimensions.x + x) as usize] {
+                    if viewshed.visible_tiles.contains(&point) {
+                        ctx.set(x, y, self.palette.fg(), self.palette.bg(), glyph);
+                    } else {
+                        ctx.set(
+                            x,
+                            y,
+                            self.palette.color_idx(3).expect("Palette load failed."),
+                            self.palette.bg(),
+                            glyph,
+                        );
+                    }
+                }
             }
         }
+    }
+}
+
+impl Algorithm2D for TileMap {
+    fn dimensions(&self) -> Point {
+        Point::new(self.dimensions.x, self.dimensions.y)
+    }
+}
+
+impl BaseMap for TileMap {
+    fn is_opaque(&self, idx: usize) -> bool {
+        self.tilemap[idx] == AbstractMapTiles::WALL
     }
 }
