@@ -1,0 +1,21 @@
+ColorPalette (
+    name: "Monokai",
+    colors: [
+        "#000000ff",
+        "#7accdaff",
+        "#9dc54bff",
+        "#00d9d9ff",
+        "#d34278ff",
+        "#ae81ffff",
+        "#d1ca89ff",
+        "#f5deb3ff",
+        "#555555ff",
+        "#66d9f9ff",
+        "#a6e22eff",
+        "#c8f0f0ff",
+        "#f92672ff",
+        "#b392efff",
+        "#e6db74ff",
+        "#ffffffff",
+    ]
+)

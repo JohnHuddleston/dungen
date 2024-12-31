@@ -1,0 +1,21 @@
+ColorPalette (
+    name: "Qud-like",
+    colors: [
+        "#0f3b3aff",
+        "#0048bdff",
+        "#009430ff",
+        "#40a4b9ff",
+        "#a64a2eff",
+        "#b154cfff",
+        "#98875fff",
+        "#b1c9c3ff",
+        "#51797aff",
+        "#0096ffff",
+        "#009430ff",
+        "#77bfcfff",
+        "#d74200ff",
+        "#da5bd6ff",
+        "#cfc041ff",
+        "#ffffffff",
+    ]
+)

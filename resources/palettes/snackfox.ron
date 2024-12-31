@@ -1,0 +1,21 @@
+ColorPalette (
+    name: "Snackfox",
+    colors: [
+        "#453c57ff",
+        "#7062d6ff",
+        "#238a64ff",
+        "#0099ffff",
+        "#b300b0ff",
+        "#d92effff",
+        "#b57438ff",
+        "#cecef5ff",
+        "#9e8db0ff",
+        "#a499faff",
+        "#17eda6ff",
+        "#00ffffff",
+        "#ff21a6ff",
+        "#ff8abfff",
+        "#fff652ff",
+        "#fffbc8ff",
+    ]
+)

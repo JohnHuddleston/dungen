@@ -1,0 +1,21 @@
+ColorPalette (
+    name: "Lee's",
+    colors: [
+        "#000000ff",
+        "#1e55a5ff",
+        "#467d37ff",
+        "#2d9187ff",
+        "#aa1400ff",
+        "#822873ff",
+        "#785032ff",
+        "#a0a0a0ff",
+        "#646464ff",
+        "#5a82d2ff",
+        "#6eb437ff",
+        "#46d7c3ff",
+        "#d73c00ff",
+        "#d255beff",
+        "#ebb400ff",
+        "#fafafaff",
+    ]
+)

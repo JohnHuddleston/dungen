@@ -1,93 +1,91 @@
 use bracket_lib::color::RGBA;
+use ron::de::from_reader;
+use serde::{Deserialize, Serialize};
+use std::fs;
 
-#[allow(unused)]
-#[derive(Clone, Copy)]
-pub enum Palette {
-    Default,
-    GB,
+#[derive(Debug, Serialize, Deserialize)]
+struct ColorPalette {
+    name: String,
+    colors: Vec<String>,
 }
 
-const PALETTE_LENGTH: u8 = 4;
-
-const PALETTES: [[RGBA; 4]; 2] = [
-    [
-        RGBA {
-            r: 0.553,
-            g: 0.412,
-            b: 0.478,
-            a: 1.,
-        },
-        RGBA {
-            r: 0.051,
-            g: 0.168,
-            b: 0.27,
-            a: 1.,
-        },
-        RGBA {
-            r: 1.,
-            g: 0.831,
-            b: 0.64,
-            a: 1.,
-        },
-        RGBA {
-            r: 0.329,
-            g: 0.306,
-            b: 0.408,
-            a: 1.,
-        },
-    ],
-    [
-        RGBA {
-            r: 0.698,
-            g: 0.76,
-            b: 0.49,
-            a: 1.,
-        },
-        RGBA {
-            r: 0.208 - 0.1,
-            g: 0.239 - 0.1,
-            b: 0.274 - 0.1,
-            a: 1.,
-        },
-        RGBA {
-            r: 0.451,
-            g: 0.604,
-            b: 0.337,
-            a: 1.,
-        },
-        RGBA {
-            r: 0.259,
-            g: 0.4,
-            b: 0.353,
-            a: 1.,
-        },
-    ],
-];
-
 #[allow(unused)]
-impl Palette {
-    pub fn fg(&self) -> RGBA {
-        match *self {
-            Palette::Default => PALETTES[0][0],
-            Palette::GB => PALETTES[1][0],
-        }
-    }
+pub struct ColorPaletteRGBA {
+    pub name: String,
+    pub colors: Vec<RGBA>,
+}
 
-    pub fn bg(&self) -> RGBA {
-        match *self {
-            Palette::Default => PALETTES[0][1],
-            Palette::GB => PALETTES[1][1],
-        }
-    }
+pub struct PaletteManager {
+    pub palettes: Vec<ColorPaletteRGBA>,
+    pub current: usize,
+}
 
-    pub fn color_idx(&self, idx: u8) -> Option<RGBA> {
-        if idx >= PALETTE_LENGTH {
-            None
-        } else {
-            match *self {
-                Palette::Default => Some(PALETTES[0][idx as usize]),
-                Palette::GB => Some(PALETTES[1][idx as usize]),
-            }
+impl PaletteManager {
+    pub fn new() -> Self {
+        let mut palettes: Vec<ColorPaletteRGBA> = Vec::new();
+        let palette_files = fs::read_dir("resources/palettes")
+            .expect("Reading palettes directory failed.")
+            .map(|f| f.unwrap().path())
+            .filter_map(|f| {
+                let f = fs::File::open(f).expect("Failed to open palette file.");
+                match from_reader(f) {
+                    Ok(x) => Some(x),
+                    Err(_) => None,
+                }
+            })
+            .collect::<Vec<ColorPalette>>();
+
+        let default_colors: Vec<&str> = vec![
+            "#000000ff",
+            "#000080ff",
+            "#008000ff",
+            "#008080ff",
+            "#800000ff",
+            "#800080ff",
+            "#808000ff",
+            "#c0c0c0ff",
+            "#808080ff",
+            "#0000ffff",
+            "#00ff00ff",
+            "#00ffffff",
+            "#ff0000ff",
+            "#ff00ffff",
+            "#ffff00ff",
+            "#ffffffff",
+        ];
+
+        palettes.push(ColorPaletteRGBA {
+            name: "Default".to_string(),
+            colors: default_colors
+                .iter()
+                .map(|c| RGBA::from_hex(*c).unwrap())
+                .collect(),
+        });
+        println!("[PaletteManager] Loaded 'Default' color palette (index 0).");
+
+        let mut converted_colors: Vec<RGBA> = Vec::new();
+
+        for palette in palette_files {
+            converted_colors.clear();
+            converted_colors = palette
+                .colors
+                .iter()
+                .map(|c| RGBA::from_hex(c).unwrap())
+                .collect();
+            println!(
+                "[PaletteManager] Loaded '{}' color palette. (index {})",
+                palette.name,
+                palettes.len()
+            );
+            palettes.push(ColorPaletteRGBA {
+                name: palette.name,
+                colors: converted_colors.clone(),
+            });
+        }
+
+        PaletteManager {
+            palettes,
+            current: 0,
         }
     }
 }

@@ -7,15 +7,14 @@ Primarily following [the bracket_lib roguelike tutorial](https://bfnightly.brack
 #### Immediate To-Do's:
 1. Refactor level building to be fault tolerant in cases where procgen fails
     1. Could be handled internally to the generation functions, clone out the tilemap and only replace it on a success?
-2. Move palette definitions to a config file (RON looks nice)
-    1. USE HEXSTRINGS, bracket_lib defining RGBA as (f32, f32, f32, f32) with elements 0.0..=1.0 is, frankly, insane, and it looks AWFUL when cargo formatted.
-    2. The palette selected should be added to the World as a resource so that all parts of the game can pull from it.
-    3. Move to 16-color palettes ASAP so I'm not limited to FG, BG, and 2 accents for everything.
-3. MOVEMENT - I need to get something simple in there, just move and get blocked by walls, this is important for the next item...
-4. CAMERA - 80x50 is annoyingly small, and with the odd-dimension restriction on at least the Hauberk style generation it's an even gnarlier 79x49!  Having a camera set up lets me make map of arbitrarily large sizes (within reason, generation will obviously take longer, though 5ms vs 20ms for the generation stage doesn't really matter)
+    2. *!! This is going to be a large refactoring effort that I'll handle while formalizing map generation !!*
+2. Monster spawning & combat
+    1. Something primitive for now, just basic attacks then I'll build up weapons (maybe even ranged)
+    2. Worth thinking about how to organize/model attacks between weapons (melee and ranged) and magic (definitely ranged, melee too?)
+3. CAMERA - 80x50 is annoyingly small, and with the odd-dimension restriction on at least the Hauberk style generation it's an even gnarlier 79x49!  Having a camera set up lets me make map of arbitrarily large sizes (within reason, generation will obviously take longer, though 5ms vs 20ms for the generation stage doesn't really matter)
 
 
-**Current Efforts:**
+**"Top-Line" Efforts:**
 * Map Generation
   * A set of basic map types and abstract tiles have been created, these will be used by MapBuilder to generate tilemaps.
   * Eventually abstract maps will be combined with themed palettes
@@ -33,6 +32,7 @@ Primarily following [the bracket_lib roguelike tutorial](https://bfnightly.brack
   * Currently only handling 'Renderable' and 'Position'
   * Need to determine what properties 'action takers' should have
     * Modeling bodies in some creative way would be cool, who wouldn't want 4 arms or the body of a horse?
+        * I'm definitely stealing CoQ's mutation thing
 * Mechanic enumeration & implementation
   * Alignment (not D&D style, more 'pantheon/domain' based)
   * Combat
@@ -43,3 +43,10 @@ Primarily following [the bracket_lib roguelike tutorial](https://bfnightly.brack
   * Currently only ASCII/CCSID 437 characters, but I'd love to switch to tilesets
   * The renderer uses GLSL shaders, that's an opportunity to get absolutely wild with the output
   * The shader will likely only be applied to the full screen output as a sort of post-processing step, so if I want lighting I'll have to work that out on my own (lighting system that can modify the output color of a character/the lightness of a tile)
+
+**Completed:**
+1. ~~Move palette definitions to a config file (RON looks nice)~~ ALL PARTS DONE!
+    1. USE HEXSTRINGS, bracket_lib defining RGBA as (f32, f32, f32, f32) with elements 0.0..=1.0 is, frankly, insane, and it looks AWFUL when cargo formatted.
+    2. The palette selected should be added to the World as a resource so that all parts of the game can pull from it.
+    3. Move to 16-color palettes ASAP so I'm not limited to FG, BG, and 2 accents for everything.
+2. ~~MOVEMENT - I need to get something simple in there, just move and get blocked by walls, this is important for the next item...~~ DONE!

@@ -1,0 +1,21 @@
+ColorPalette (
+    name: "Lazer",
+    colors: [
+        "#090900ff",
+        "#003321ff",
+        "#886d23ff",
+        "#088313ff",
+        "#62200bff",
+        "#4a0d02ff",
+        "#844e06ff",
+        "#384023ff",
+        "#292701ff",
+        "#287035ff",
+        "#efc140ff",
+        "#23ca37ff",
+        "#af3b14ff",
+        "#a52102ff",
+        "#e9ab03ff",
+        "#ccef73ff",
+    ]
+)

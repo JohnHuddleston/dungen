@@ -9,12 +9,12 @@ use crate::map_gen::{abstract_map::TileMap, abstract_tiles::AbstractMapTiles};
 use bracket_lib::prelude::Rect;
 use rand::prelude::*;
 
-const MAX_PLACEMENT_TRIES: u16 = 2000;
-const BASE_ROOM_MIN: u32 = 2;
-const BASE_ROOM_MAX: u32 = 5;
+const MAX_PLACEMENT_TRIES: u16 = 100;
+const BASE_ROOM_MIN: u32 = 1;
+const BASE_ROOM_MAX: u32 = 4;
 const DIRECTIONS: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
-const WINDING_FACTOR: i32 = 50;
-const EXTRA_CONNECTION_CHANCE: i32 = 80;
+const WINDING_FACTOR: i32 = 40;
+const EXTRA_CONNECTION_CHANCE: i32 = 85;
 
 pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
     let mut current_region = -1;
@@ -244,6 +244,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
 
     tilemap.player_spawn.x = (rooms[0].x1 + rooms[0].width() / 2) as u32;
     tilemap.player_spawn.y = (rooms[0].y1 + rooms[0].height() / 2) as u32;
+    tilemap.rooms = rooms;
 }
 
 fn can_carve(tilemap: &TileMap, position: &(u32, u32), direction: &(i32, i32)) -> bool {

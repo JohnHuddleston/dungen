@@ -12,10 +12,10 @@ use crate::map_gen::{
     abstract_map::MapType,
     generator::{Level, LevelBuilder},
 };
-use crate::palettes::Palette;
 use crate::visibility_system::VisiblitySystem;
 use bracket_lib::prelude::*;
 use map_gen::abstract_tiles::AbstractMapTiles;
+use palettes::PaletteManager;
 use specs::{prelude::*, Component};
 
 #[derive(Component, Debug)]
@@ -27,8 +27,7 @@ pub struct Position {
 #[derive(Component, Debug)]
 pub struct Renderable {
     glyph: FontCharType,
-    fg: RGBA,
-    bg: RGBA,
+    color_index: usize,
 }
 
 #[derive(Component, Debug)]
@@ -57,6 +56,15 @@ fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
     }
 }
 
+fn cycle_palette(ecs: &mut World) {
+    let mut palette_man = ecs.fetch_mut::<PaletteManager>();
+    palette_man.current = (palette_man.current + 1) % palette_man.palettes.len();
+    println!(
+        "[PaletteManager] Switched to '{}' palette.",
+        palette_man.palettes[palette_man.current].name
+    );
+}
+
 fn player_input(gs: &mut State, ctx: &mut BTerm) {
     match ctx.key {
         None => {}
@@ -65,6 +73,7 @@ fn player_input(gs: &mut State, ctx: &mut BTerm) {
             VirtualKeyCode::Right | VirtualKeyCode::D => try_move_player(1, 0, &mut gs.ecs),
             VirtualKeyCode::Down | VirtualKeyCode::S => try_move_player(0, 1, &mut gs.ecs),
             VirtualKeyCode::Up | VirtualKeyCode::W => try_move_player(0, -1, &mut gs.ecs),
+            VirtualKeyCode::T => cycle_palette(&mut gs.ecs),
             _ => {}
         },
     }
@@ -81,15 +90,24 @@ impl GameState for State {
         self.run_systems();
 
         let level = self.ecs.fetch::<Level>();
-        let viewsheds = self.ecs.read_storage::<Viewshed>();
-        let viewshed = viewsheds.join().collect::<Vec<_>>()[0];
-        level.maps[0].draw(&viewshed, ctx);
+        //let viewsheds = self.ecs.read_storage::<Viewshed>();
+        let palette_man = self.ecs.fetch::<PaletteManager>();
+        let palette = &palette_man.palettes[palette_man.current].colors.as_slice();
+        level.maps[0].draw(ctx, palette);
 
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
 
         for (pos, render) in (&positions, &renderables).join() {
-            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+            if level.maps[0].visible[(pos.y * level.maps[0].dimensions.x as i32 + pos.x) as usize] {
+                ctx.set(
+                    pos.x,
+                    pos.y,
+                    palette[render.color_index],
+                    palette[0],
+                    render.glyph,
+                );
+            }
         }
     }
 }
@@ -111,8 +129,6 @@ fn main() -> BError {
         .with_title("Chosen v0.0.0.1pre-alpha")
         .build()?;
 
-    let palette = Palette::Default;
-
     let mut gs = State { ecs: World::new() };
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
@@ -122,9 +138,28 @@ fn main() -> BError {
     let level = LevelBuilder::new()
         .with_dimensions(79, 49)
         .of_type(MapType::Base)
-        .with_palette(palette)
         .build()
         .expect("Level failed to generate.");
+
+    for room in level.maps[0].rooms.iter().skip(1) {
+        let center_point = room.center();
+        gs.ecs
+            .create_entity()
+            .with(Position {
+                x: center_point.x,
+                y: center_point.y,
+            })
+            .with(Renderable {
+                glyph: to_cp437('g'),
+                color_index: 12,
+            })
+            .with(Viewshed {
+                visible_tiles: Vec::new(),
+                range: 8,
+                dirty: true,
+            })
+            .build();
+    }
 
     gs.ecs
         .create_entity()
@@ -134,8 +169,7 @@ fn main() -> BError {
         })
         .with(Renderable {
             glyph: to_cp437('@'),
-            fg: palette.color_idx(2).expect("Palette load failed."),
-            bg: palette.bg(),
+            color_index: 11,
         })
         .with(Player {})
         .with(Viewshed {
@@ -146,6 +180,9 @@ fn main() -> BError {
         .build();
 
     gs.ecs.insert(level);
+
+    let palette_man = PaletteManager::new();
+    gs.ecs.insert(palette_man);
 
     main_loop(context, gs)
 }

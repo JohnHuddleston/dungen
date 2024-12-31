@@ -1,0 +1,21 @@
+ColorPalette (
+    name: "Solarized",
+    colors: [
+        "#002b36ff",
+        "#268bd2ff",
+        "#859900ff",
+        "#2aa198ff",
+        "#dc322fff",
+        "#d33682ff",
+        "#b58a00ff",
+        "#93a1a1ff",
+        "#586e75ff",
+        "#7baee6ff",
+        "#adcb67ff",
+        "#7fd7caff",
+        "#f76a6aff",
+        "#f186aaff",
+        "#ecc853ff",
+        "#fdf6e3ff",
+    ]
+)

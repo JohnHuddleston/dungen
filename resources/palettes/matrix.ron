@@ -1,0 +1,21 @@
+ColorPalette(
+    name: "Matrix",
+    colors: [
+        "#192007ff",
+        "#18774fff",
+        "#4d7218ff",
+        "#b38700ff",
+        "#76440bff",
+        "#204631ff",
+        "#4d5407ff",
+        "#6b6f4bff",
+        "#383a26ff",
+        "#0dbd75ff",
+        "#88be12ff",
+        "#ffcc00ff",
+        "#b96706ff",
+        "#527f39ff",
+        "#b9da1cff",
+        "#d7e894ff",
+    ]
+)
