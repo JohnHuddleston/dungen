@@ -1,5 +1,4 @@
 use crate::map_gen::abstract_tiles::AbstractMapTiles;
-use crate::Viewshed;
 use bracket_lib::prelude::*;
 use glam::UVec2;
 
