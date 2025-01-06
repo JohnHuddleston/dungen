@@ -9,7 +9,7 @@ impl<'a> System<'a> for VisiblitySystem {
         WriteExpect<'a, Level>,
         Entities<'a>,
         WriteStorage<'a, Viewshed>,
-        WriteStorage<'a, Position>,
+        ReadStorage<'a, Position>,
         ReadStorage<'a, Player>,
     );
 
@@ -29,8 +29,8 @@ impl<'a> System<'a> for VisiblitySystem {
                         && p.y < map.dimensions.y as i32
                 });
 
-                let p: Option<&Player> = player.get(ent);
-                if let Some(_) = p {
+                let _p: Option<&Player> = player.get(ent);
+                if let Some(_p) = _p {
                     for t in map.maps[0].visible.iter_mut() {
                         *t = false;
                     }

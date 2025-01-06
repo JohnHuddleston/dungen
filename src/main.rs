@@ -5,92 +5,48 @@ mod map_gen {
     pub mod generator;
     pub mod hauberk_gen;
 }
+mod components;
+mod monster_ai_system;
 mod palettes;
+mod player;
 mod visibility_system;
 
 use crate::map_gen::{
     abstract_map::MapType,
     generator::{Level, LevelBuilder},
 };
-use crate::visibility_system::VisiblitySystem;
+use crate::{
+    components::{Monster, Player, Position, Renderable, Viewshed},
+    palettes::PaletteManager,
+    player::player_input,
+    visibility_system::VisiblitySystem,
+};
 use bracket_lib::prelude::*;
-use map_gen::abstract_tiles::AbstractMapTiles;
-use palettes::PaletteManager;
-use specs::{prelude::*, Component};
+use monster_ai_system::MonsterAI;
+use specs::prelude::*;
 
-#[derive(Component, Debug)]
-pub struct Position {
-    x: i32,
-    y: i32,
-}
-
-#[derive(Component, Debug)]
-pub struct Renderable {
-    glyph: FontCharType,
-    color_index: usize,
-}
-
-#[derive(Component, Debug)]
-pub struct Viewshed {
-    pub visible_tiles: Vec<Point>,
-    pub range: i32,
-    pub dirty: bool,
-}
-
-#[derive(Component)]
-pub struct Player {}
-
-fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
-    let mut positions = ecs.write_storage::<Position>();
-    let mut players = ecs.write_storage::<Player>();
-    let mut viewsheds = ecs.write_storage::<Viewshed>();
-    let level = ecs.fetch::<Level>();
-
-    for (_, pos, viewshed) in (&mut players, &mut positions, &mut viewsheds).join() {
-        let destination_idx = (pos.y + delta_y) * level.dimensions.x as i32 + (pos.x + delta_x);
-        if level.maps[0].tilemap[destination_idx as usize] != AbstractMapTiles::WALL {
-            pos.x = pos.x + delta_x;
-            pos.y = pos.y + delta_y;
-            viewshed.dirty = true;
-        }
-    }
-}
-
-fn cycle_palette(ecs: &mut World) {
-    let mut palette_man = ecs.fetch_mut::<PaletteManager>();
-    palette_man.current = (palette_man.current + 1) % palette_man.palettes.len();
-    println!(
-        "[PaletteManager] Switched to '{}' palette.",
-        palette_man.palettes[palette_man.current].name
-    );
-}
-
-fn player_input(gs: &mut State, ctx: &mut BTerm) {
-    match ctx.key {
-        None => {}
-        Some(key) => match key {
-            VirtualKeyCode::Left | VirtualKeyCode::A => try_move_player(-1, 0, &mut gs.ecs),
-            VirtualKeyCode::Right | VirtualKeyCode::D => try_move_player(1, 0, &mut gs.ecs),
-            VirtualKeyCode::Down | VirtualKeyCode::S => try_move_player(0, 1, &mut gs.ecs),
-            VirtualKeyCode::Up | VirtualKeyCode::W => try_move_player(0, -1, &mut gs.ecs),
-            VirtualKeyCode::T => cycle_palette(&mut gs.ecs),
-            _ => {}
-        },
-    }
+#[derive(PartialEq, Copy, Clone)]
+pub enum RunState {
+    Paused,
+    Running,
 }
 
 struct State {
     ecs: World,
+    runstate: RunState,
 }
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
         ctx.cls();
 
-        player_input(self, ctx);
-        self.run_systems();
+        if self.runstate == RunState::Running {
+            self.run_systems();
+            self.runstate = RunState::Paused;
+        } else {
+            self.runstate = player_input(self, ctx);
+        }
 
         let level = self.ecs.fetch::<Level>();
-        //let viewsheds = self.ecs.read_storage::<Viewshed>();
         let palette_man = self.ecs.fetch::<PaletteManager>();
         let palette = &palette_man.palettes[palette_man.current].colors.as_slice();
         level.maps[0].draw(ctx, palette);
@@ -116,6 +72,8 @@ impl State {
     fn run_systems(&mut self) {
         let mut vis = VisiblitySystem {};
         vis.run_now(&self.ecs);
+        let mut mob = MonsterAI {};
+        mob.run_now(&self.ecs);
         self.ecs.maintain();
     }
 }
@@ -129,10 +87,14 @@ fn main() -> BError {
         .with_title("Chosen v0.0.0.1pre-alpha")
         .build()?;
 
-    let mut gs = State { ecs: World::new() };
+    let mut gs = State {
+        ecs: World::new(),
+        runstate: RunState::Running,
+    };
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<Player>();
+    gs.ecs.register::<Monster>();
     gs.ecs.register::<Viewshed>();
 
     let level = LevelBuilder::new()
@@ -158,6 +120,7 @@ fn main() -> BError {
                 range: 8,
                 dirty: true,
             })
+            .with(Monster {})
             .build();
     }
 
@@ -178,6 +141,10 @@ fn main() -> BError {
             dirty: true,
         })
         .build();
+    gs.ecs.insert(Point::new(
+        level.maps[0].player_spawn.x,
+        level.maps[0].player_spawn.y,
+    ));
 
     gs.ecs.insert(level);
 

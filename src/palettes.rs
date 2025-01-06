@@ -1,6 +1,7 @@
 use bracket_lib::color::RGBA;
 use ron::de::from_reader;
 use serde::{Deserialize, Serialize};
+use specs::prelude::*;
 use std::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -88,4 +89,13 @@ impl PaletteManager {
             current: 0,
         }
     }
+}
+
+pub fn cycle_palette(ecs: &mut World) {
+    let mut palette_man = ecs.fetch_mut::<PaletteManager>();
+    palette_man.current = (palette_man.current + 1) % palette_man.palettes.len();
+    println!(
+        "[PaletteManager] Switched to '{}' palette.",
+        palette_man.palettes[palette_man.current].name
+    );
 }
