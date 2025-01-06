@@ -28,13 +28,16 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
 
 pub fn player_input(gs: &mut State, ctx: &mut BTerm) -> RunState {
     match ctx.key {
-        None => {}
+        None => return RunState::Paused,
         Some(key) => match key {
             VirtualKeyCode::Left | VirtualKeyCode::A => try_move_player(-1, 0, &mut gs.ecs),
             VirtualKeyCode::Right | VirtualKeyCode::D => try_move_player(1, 0, &mut gs.ecs),
             VirtualKeyCode::Down | VirtualKeyCode::S => try_move_player(0, 1, &mut gs.ecs),
             VirtualKeyCode::Up | VirtualKeyCode::W => try_move_player(0, -1, &mut gs.ecs),
-            VirtualKeyCode::T => cycle_palette(&mut gs.ecs),
+            VirtualKeyCode::T => {
+                cycle_palette(&mut gs.ecs);
+                return RunState::Paused;
+            }
             _ => return RunState::Paused,
         },
     }
