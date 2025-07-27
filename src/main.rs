@@ -16,7 +16,7 @@ use crate::map_gen::{
     generator::{Level, LevelBuilder},
 };
 use crate::{
-    components::{Monster, Player, Position, Renderable, Viewshed},
+    components::{Monster, Name, Player, Position, Renderable, Viewshed},
     palettes::PaletteManager,
     player::player_input,
     visibility_system::VisiblitySystem,
@@ -96,6 +96,7 @@ fn main() -> BError {
     gs.ecs.register::<Player>();
     gs.ecs.register::<Monster>();
     gs.ecs.register::<Viewshed>();
+    gs.ecs.register::<Name>();
 
     let level = LevelBuilder::new()
         .with_dimensions(79, 49)
@@ -103,17 +104,35 @@ fn main() -> BError {
         .build()
         .expect("Level failed to generate.");
 
-    for room in level.maps[0].rooms.iter().skip(1) {
+    let mut rng = RandomNumberGenerator::new();
+
+    for (i, room) in level.maps[0].rooms.iter().skip(1).enumerate() {
         let center_point = room.center();
+        let glyph: FontCharType;
+        let name: String;
+        let color_index: usize;
+        let roll = rng.roll_dice(1, 2);
+        match roll {
+            1 => {
+                glyph = to_cp437('g');
+                name = "Goblin".to_string();
+                color_index = 10;
+            }
+            _ => {
+                glyph = to_cp437('o');
+                name = "Orc".to_string();
+                color_index = 2;
+            }
+        }
         gs.ecs
             .create_entity()
             .with(Position {
                 x: center_point.x,
                 y: center_point.y,
             })
-            .with(Renderable {
-                glyph: to_cp437('g'),
-                color_index: 12,
+            .with(Renderable { glyph, color_index })
+            .with(Name {
+                name: format!("{} #{}", name, i),
             })
             .with(Viewshed {
                 visible_tiles: Vec::new(),
@@ -135,6 +154,9 @@ fn main() -> BError {
             color_index: 11,
         })
         .with(Player {})
+        .with(Name {
+            name: "Hero".to_string(),
+        })
         .with(Viewshed {
             visible_tiles: Vec::new(),
             range: 8,

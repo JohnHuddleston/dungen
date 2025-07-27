@@ -8,6 +8,11 @@ pub struct Position {
 }
 
 #[derive(Component, Debug)]
+pub struct Name {
+    pub name: String,
+}
+
+#[derive(Component, Debug)]
 pub struct Renderable {
     pub glyph: FontCharType,
     pub color_index: usize,

@@ -17,6 +17,17 @@ pub enum MapType {
     Labyrinth,
 }
 
+const ADJACENT_OFFSETS: &[(i8, i8)] = &[
+    (0, -1),  // north
+    (1, -1),  // northeast
+    (1, 0),   // east
+    (1, 1),   // southeast
+    (0, 1),   // south
+    (-1, 1),  // southwest
+    (-1, 0),  // west
+    (-1, -1), // northwest
+];
+
 #[allow(unused)]
 pub struct TileMap {
     pub tilemap: Vec<AbstractMapTiles>,
@@ -73,6 +84,28 @@ impl TileMap {
             }
         }
     }
+
+    fn get_idx_neighbors(&self, idx: usize) -> Vec<usize> {
+        let mut valid_neighbors: Vec<usize> = Vec::with_capacity(8);
+        let row = (idx / self.dimensions.x as usize);
+        let col = (idx % self.dimensions.x as usize);
+        let mut new_idx: (isize, isize);
+        for (x_off, y_off) in ADJACENT_OFFSETS {
+            new_idx = (
+                col as isize + isize::from(x_off.clone()),
+                row as isize + isize::from(y_off.clone()),
+            );
+            if new_idx.0 >= 0
+                && new_idx.0 <= (self.dimensions.x - 1) as isize
+                && new_idx.1 >= 0
+                && new_idx.1 <= (self.dimensions.y - 1) as isize
+            {
+                valid_neighbors
+                    .push(new_idx.1 as usize * self.dimensions.x as usize + new_idx.0 as usize)
+            }
+        }
+        valid_neighbors
+    }
 }
 
 impl Algorithm2D for TileMap {
@@ -84,5 +117,17 @@ impl Algorithm2D for TileMap {
 impl BaseMap for TileMap {
     fn is_opaque(&self, idx: usize) -> bool {
         self.tilemap[idx] == AbstractMapTiles::WALL
+    }
+
+    fn get_available_exits(&self, idx: usize) -> SmallVec<[(usize, f32); 10]> {
+        let mut exits: SmallVec<[(usize, f32); 10]> = SmallVec::new();
+        // let's push logic for finding valid neighbors to a new method on TileMap
+        let valid_neighbors = self.get_idx_neighbors(idx);
+        for neighbor_idx in valid_neighbors.iter() {
+            if self.tilemap[*neighbor_idx] != AbstractMapTiles::WALL {
+                exits.push((*neighbor_idx, 1.0));
+            }
+        }
+        exits
     }
 }
