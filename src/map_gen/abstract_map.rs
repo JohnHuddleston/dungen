@@ -34,6 +34,7 @@ pub struct TileMap {
     pub rooms: Vec<Rect>,
     pub discovered: Vec<bool>,
     pub visible: Vec<bool>,
+    pub blocked: Vec<bool>,
     pub dimensions: UVec2,
     pub player_spawn: UVec2,
     pub exits: Vec<UVec2>,
@@ -47,6 +48,7 @@ impl TileMap {
             rooms: Vec::new(),
             discovered: vec![false; dimensions.x as usize * dimensions.y as usize],
             visible: vec![false; dimensions.x as usize * dimensions.y as usize],
+            blocked: vec![false; dimensions.x as usize * dimensions.y as usize],
             dimensions,
             player_spawn: UVec2 { x: 0, y: 0 },
             exits: Vec::new(),
@@ -117,6 +119,18 @@ impl Algorithm2D for TileMap {
 impl BaseMap for TileMap {
     fn is_opaque(&self, idx: usize) -> bool {
         self.tilemap[idx] == AbstractMapTiles::WALL
+    }
+
+    fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
+        let point_a = Point::new(
+            idx1 % self.dimensions.y as usize,
+            idx1 / self.dimensions.y as usize,
+        );
+        let point_b = Point::new(
+            idx2 % self.dimensions.y as usize,
+            idx2 / self.dimensions.y as usize,
+        );
+        DistanceAlg::Pythagoras.distance2d(point_a, point_b)
     }
 
     fn get_available_exits(&self, idx: usize) -> SmallVec<[(usize, f32); 10]> {
