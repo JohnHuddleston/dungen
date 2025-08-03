@@ -108,6 +108,17 @@ impl TileMap {
         }
         valid_neighbors
     }
+
+    pub fn xy_to_idx(&self, x: u32, y: u32) -> u32 {
+        return y * self.dimensions.x + x;
+    }
+
+    pub fn idx_to_xy(&self, idx: u32) -> UVec2 {
+        UVec2 {
+            x: idx as u32 % self.dimensions.x,
+            y: idx as u32 / self.dimensions.x,
+        }
+    }
 }
 
 impl Algorithm2D for TileMap {

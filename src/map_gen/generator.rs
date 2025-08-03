@@ -31,18 +31,18 @@ impl LevelBuilder {
         }
     }
 
-    pub fn of_type(mut self, map_type: MapType) -> LevelBuilder {
+    pub fn of_type(mut self, map_type: MapType) -> Self {
         self.map_type = map_type;
         self
     }
 
-    pub fn with_dimensions(mut self, x: u32, y: u32) -> LevelBuilder {
+    pub fn with_dimensions(mut self, x: u32, y: u32) -> Self {
         self.dimensions.x = x;
         self.dimensions.y = y;
         self
     }
 
-    pub fn with_n_maps(mut self, n: u8) -> LevelBuilder {
+    pub fn with_n_maps(mut self, n: u8) -> Self {
         self.n_maps = n;
         self
     }
