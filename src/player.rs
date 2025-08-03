@@ -15,7 +15,7 @@ pub fn try_move_player(delta_x: i32, delta_y: i32, ecs: &mut World) {
 
     for (_, pos, viewshed) in (&mut players, &mut positions, &mut viewsheds).join() {
         let destination_idx = (pos.y + delta_y) * level.dimensions.x as i32 + (pos.x + delta_x);
-        if level.maps[0].tilemap[destination_idx as usize] != AbstractMapTiles::WALL {
+        if level.maps[0].tilemap[destination_idx as usize] != AbstractMapTiles::Wall {
             pos.x = pos.x + delta_x;
             pos.y = pos.y + delta_y;
             viewshed.dirty = true;

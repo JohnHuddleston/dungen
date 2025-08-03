@@ -69,7 +69,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
     for y in (1..tilemap.dimensions.y).step_by(2) {
         for x in (1..tilemap.dimensions.x).step_by(2) {
             if tilemap.tilemap[(y as u32 * tilemap.dimensions.x + x as u32) as usize]
-                == AbstractMapTiles::WALL
+                == AbstractMapTiles::Wall
             {
                 let start = (x, y);
                 let mut cells: Vec<(u32, u32)> = Vec::new();
@@ -125,7 +125,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
     for y in 1..(tilemap.dimensions.y - 1) {
         for x in 1..(tilemap.dimensions.x - 1) {
             let index = y * tilemap.dimensions.x + x;
-            if tilemap.tilemap[index as usize] != AbstractMapTiles::WALL {
+            if tilemap.tilemap[index as usize] != AbstractMapTiles::Wall {
                 continue;
             }
 
@@ -165,7 +165,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
         let random_connector = connectors[rng.gen_range(0..connectors.len())];
         tilemap.tilemap
             [(random_connector.1 * tilemap.dimensions.x + random_connector.0) as usize] =
-            AbstractMapTiles::FLOOR;
+            AbstractMapTiles::Floor;
 
         let mut affected_regions = connector_regions
             .get(&random_connector)
@@ -220,7 +220,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
         for y in 1..(tilemap.dimensions.y - 1) {
             for x in 1..(tilemap.dimensions.x - 1) {
                 let index = y * tilemap.dimensions.x + x;
-                if tilemap.tilemap[index as usize] == AbstractMapTiles::WALL {
+                if tilemap.tilemap[index as usize] == AbstractMapTiles::Wall {
                     continue;
                 }
 
@@ -229,7 +229,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
                     let offset_index: usize =
                         ((y as i32 + direction.1) * tilemap.dimensions.x as i32
                             + (x as i32 + direction.0)) as usize;
-                    if tilemap.tilemap[offset_index] == AbstractMapTiles::FLOOR {
+                    if tilemap.tilemap[offset_index] == AbstractMapTiles::Floor {
                         exits += 1;
                     }
                 }
@@ -237,7 +237,7 @@ pub fn build_hauberk_dungeon(tilemap: &mut TileMap) {
                     continue;
                 }
                 done = false;
-                tilemap.tilemap[index as usize] = AbstractMapTiles::WALL;
+                tilemap.tilemap[index as usize] = AbstractMapTiles::Wall;
             }
         }
     }
@@ -264,7 +264,7 @@ fn can_carve(tilemap: &TileMap, position: &(u32, u32), direction: &(i32, i32)) -
     {
         let two_out_wall = tilemap.tilemap
             [(two_out.1 as u32 * tilemap.dimensions.x + two_out.0 as u32) as usize]
-            == AbstractMapTiles::WALL;
+            == AbstractMapTiles::Wall;
         two_out_wall
     } else {
         false
@@ -273,6 +273,6 @@ fn can_carve(tilemap: &TileMap, position: &(u32, u32), direction: &(i32, i32)) -
 
 fn carve(tilemap: &mut TileMap, position: (u32, u32), regions: &mut Vec<i32>, current_region: i32) {
     let index: usize = (position.1 * tilemap.dimensions.x + position.0) as usize;
-    tilemap.tilemap[index] = AbstractMapTiles::FLOOR;
+    tilemap.tilemap[index] = AbstractMapTiles::Floor;
     regions[index] = current_region;
 }

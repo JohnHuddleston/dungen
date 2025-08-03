@@ -44,7 +44,7 @@ pub struct TileMap {
 impl TileMap {
     pub fn new(dimensions: UVec2) -> Self {
         TileMap {
-            tilemap: vec![AbstractMapTiles::WALL; dimensions.x as usize * dimensions.y as usize],
+            tilemap: vec![AbstractMapTiles::Wall; dimensions.x as usize * dimensions.y as usize],
             rooms: Vec::new(),
             discovered: vec![false; dimensions.x as usize * dimensions.y as usize],
             visible: vec![false; dimensions.x as usize * dimensions.y as usize],
@@ -129,7 +129,7 @@ impl Algorithm2D for TileMap {
 
 impl BaseMap for TileMap {
     fn is_opaque(&self, idx: usize) -> bool {
-        self.tilemap[idx] == AbstractMapTiles::WALL
+        self.tilemap[idx] == AbstractMapTiles::Wall
     }
 
     fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
@@ -149,7 +149,7 @@ impl BaseMap for TileMap {
         // let's push logic for finding valid neighbors to a new method on TileMap
         let valid_neighbors = self.get_idx_neighbors(idx);
         for neighbor_idx in valid_neighbors.iter() {
-            if self.tilemap[*neighbor_idx] != AbstractMapTiles::WALL {
+            if self.tilemap[*neighbor_idx] != AbstractMapTiles::Wall {
                 exits.push((*neighbor_idx, 1.0));
             }
         }

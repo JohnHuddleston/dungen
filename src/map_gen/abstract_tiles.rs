@@ -11,12 +11,17 @@ pub struct RenderInfo {
 #[allow(unused)]
 #[derive(Eq, PartialEq, Clone, Copy, Hash)]
 pub enum AbstractMapTiles {
-    ABYSS,   // Empty cell
-    FLOOR,   // Walkable indoor cell
-    GROUND,  // Walkable outdoor cell
-    WALL,    // Wall cell
-    PIT,     // Lava, water, etc.
-    UNKNOWN, // Should'nt be used
+    Abyss,  // Empty cell
+    Floor,  // Walkable indoor cell
+    Ground, // Walkable outdoor cell
+    Wall,   // Wall cell
+    Pit,    // Lava, water, etc.
+    StairsUp,
+    StairsDown,
+    StairsBidirectional,
+    DoorClosed,
+    DoorOpen,
+    Unknown, // Should'nt be used
 }
 
 impl fmt::Display for AbstractMapTiles {
@@ -29,12 +34,17 @@ impl fmt::Display for AbstractMapTiles {
 impl From<&char> for AbstractMapTiles {
     fn from(value: &char) -> Self {
         match value {
-            ' ' => AbstractMapTiles::ABYSS,
-            '.' => AbstractMapTiles::FLOOR,
-            ',' => AbstractMapTiles::GROUND,
-            '#' => AbstractMapTiles::WALL,
-            '_' => AbstractMapTiles::PIT,
-            _ => AbstractMapTiles::UNKNOWN,
+            ' ' => AbstractMapTiles::Abyss,
+            '.' => AbstractMapTiles::Floor,
+            ',' => AbstractMapTiles::Ground,
+            '#' => AbstractMapTiles::Wall,
+            '_' => AbstractMapTiles::Pit,
+            '^' => AbstractMapTiles::StairsUp,
+            'v' => AbstractMapTiles::StairsDown,
+            'X' => AbstractMapTiles::StairsBidirectional,
+            '+' => AbstractMapTiles::DoorClosed,
+            '-' => AbstractMapTiles::DoorOpen,
+            _ => AbstractMapTiles::Unknown,
         }
     }
 }
@@ -42,43 +52,73 @@ impl From<&char> for AbstractMapTiles {
 impl AbstractMapTiles {
     pub fn as_char(&self) -> char {
         match *self {
-            AbstractMapTiles::ABYSS => ' ',
-            AbstractMapTiles::FLOOR => '.',
-            AbstractMapTiles::GROUND => ',',
-            AbstractMapTiles::WALL => '#',
-            AbstractMapTiles::PIT => '_',
-            AbstractMapTiles::UNKNOWN => '?',
+            AbstractMapTiles::Abyss => ' ',
+            AbstractMapTiles::Floor => '.',
+            AbstractMapTiles::Ground => ',',
+            AbstractMapTiles::Wall => '#',
+            AbstractMapTiles::Pit => '_',
+            AbstractMapTiles::StairsUp => '^',
+            AbstractMapTiles::StairsDown => 'v',
+            AbstractMapTiles::StairsBidirectional => 'X',
+            AbstractMapTiles::DoorClosed => '+',
+            AbstractMapTiles::DoorOpen => '-',
+            AbstractMapTiles::Unknown => '?',
         }
     }
 
     pub fn render_info(&self) -> RenderInfo {
         match *self {
-            AbstractMapTiles::ABYSS => RenderInfo {
+            AbstractMapTiles::Abyss => RenderInfo {
                 chars: ['░', '░'],
                 fg_index: 8,
                 bg_index: 0,
             },
-            AbstractMapTiles::FLOOR => RenderInfo {
+            AbstractMapTiles::Floor => RenderInfo {
                 chars: ['.', ' '],
                 fg_index: 15,
                 bg_index: 0,
             },
-            AbstractMapTiles::GROUND => RenderInfo {
+            AbstractMapTiles::Ground => RenderInfo {
                 chars: [',', ' '],
                 fg_index: 15,
                 bg_index: 0,
             },
-            AbstractMapTiles::WALL => RenderInfo {
+            AbstractMapTiles::Wall => RenderInfo {
                 chars: ['█', '█'],
                 fg_index: 15,
                 bg_index: 0,
             },
-            AbstractMapTiles::PIT => RenderInfo {
+            AbstractMapTiles::Pit => RenderInfo {
                 chars: ['_', '_'],
                 fg_index: 7,
                 bg_index: 0,
             },
-            AbstractMapTiles::UNKNOWN => RenderInfo {
+            AbstractMapTiles::StairsUp => RenderInfo {
+                chars: ['^', '^'],
+                fg_index: 15,
+                bg_index: 0,
+            },
+            AbstractMapTiles::StairsDown => RenderInfo {
+                chars: ['v', 'v'],
+                fg_index: 15,
+                bg_index: 0,
+            },
+            AbstractMapTiles::StairsBidirectional => RenderInfo {
+                chars: ['X', 'X'],
+                fg_index: 15,
+                bg_index: 0,
+            },
+            AbstractMapTiles::DoorClosed => RenderInfo {
+                chars: ['+', '+'],
+                fg_index: 15,
+                bg_index: 0,
+            },
+            AbstractMapTiles::DoorOpen => RenderInfo {
+                chars: ['-', '-'],
+                fg_index: 15,
+                bg_index: 0,
+            },
+            AbstractMapTiles::Unknown => RenderInfo {
                 chars: ['?', '?'],
                 fg_index: 14,
                 bg_index: 4,
